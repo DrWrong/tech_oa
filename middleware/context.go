@@ -4,22 +4,25 @@ import (
 	"github.com/Unknwon/macaron"
 	"github.com/astaxie/beego/orm"
 	"github.com/macaron-contrib/session"
-	"models"
+	"tech_oa/models"
 )
 
 type Context struct {
 	*macaron.Context
-	User *models.User
+	User     *models.User
+	IsSigned bool
 }
 
 func (ctx *Context) GetUserBySession(sess session.Store) {
-	uid = sess.Get("uid").(string)
-	if uid != nil {
+	// sess.Set("uid", "123")
+
+	if uid, ok := sess.Get("uid").(string); ok {
 		o := orm.NewOrm()
-		user := User{Id: uid}
-		err = o.Read(&user)
-		if err != nil {
-			User = &user
+		user := models.User{Id: uid}
+		err := o.Read(&user)
+		if err == nil {
+			ctx.User = &user
+			ctx.IsSigned = true
 		}
 	}
 }
@@ -27,7 +30,8 @@ func (ctx *Context) GetUserBySession(sess session.Store) {
 func Contexter() macaron.Handler {
 	return func(c *macaron.Context, sess session.Store) {
 		ctx := &Context{
-			Context: c,
+			Context:  c,
+			IsSigned: false,
 		}
 		ctx.GetUserBySession(sess)
 		c.Map(ctx)
