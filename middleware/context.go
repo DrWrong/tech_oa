@@ -11,6 +11,7 @@ type Context struct {
 	*macaron.Context
 	User     *models.User
 	IsSigned bool
+	Project  *models.Project
 }
 
 func (ctx *Context) GetUserBySession(sess session.Store) {
@@ -20,8 +21,8 @@ func (ctx *Context) GetUserBySession(sess session.Store) {
 		o := orm.NewOrm()
 		user := models.User{Id: uid}
 		err := o.Read(&user)
+		ctx.User = &user
 		if err == nil {
-			ctx.User = &user
 			ctx.IsSigned = true
 		}
 	}
@@ -33,7 +34,9 @@ func Contexter() macaron.Handler {
 			Context:  c,
 			IsSigned: false,
 		}
+
 		ctx.GetUserBySession(sess)
+		ctx.Data["ctx"] = ctx
 		c.Map(ctx)
 	}
 }

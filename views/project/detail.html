@@ -1,0 +1,44 @@
+{% extends "../base.html" %}
+{% block content %}
+{% if success %}
+<div class="alert alert-success" role="alert">
+<ul class="list-group">
+
+    <li class="list-group-item">{{ success }}</li>
+</ul>
+</div>
+
+{% endif %}
+<div class="row">
+  <div class="col-xs-8">
+      <form role="form" action="/project/{{ ctx.Project.Id}}/score" method="post">
+         <!-- <input type="hidden" name="from_group"> -->
+         <div class="form-group">
+          <label for="project">选择评分对象</label>
+          <select class="form-control" name="judge_group_id">
+            {% for group in ctx.Project.GetGroups() %}
+            <option value="{{ group.Id }}">{{ group.GetDescription }}</option>
+            {% endfor %}
+          </select>
+         </div>
+         <div class="form-group">
+          <label for="grades">评分</label>
+          <input type="number" class="form-control" name="score" placeholder="文本输入">
+         </div>
+         <div class="form-group">
+               <button type="submit" class="btn btn-default" action="" name='' id=''>提交</button>
+         </div>
+      </form>
+  </div>
+  <div class="col-xs-4">
+  <ul class="nav nav-pills nav-stacked" role="tablist">
+  <li class="active">
+      <a href="#">学生评分</a>
+  </li>
+  </ul>
+  </div>
+</div>
+
+
+
+{% endblock %}

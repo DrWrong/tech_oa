@@ -33,20 +33,20 @@
 
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      {% if ctx.IsSigned %}
+
       <ul class="nav navbar-nav">
-        <li class="active"><a href="#">Link</a></li>
-        <li><a href="#">Link</a></li>
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown">我涉及到的项目<span class="caret"></span></a>
           <ul class="dropdown-menu" role="menu">
-            {% for project in ctx.User.Projects %}
-                <li><a href="#">project.Name</a></li>
+            {% for project in ctx.User.GetProjects() %}
+                <li><a href="/project/{{ project.Id }}">{{ project.Name }}</a></li>
              {% endfor %}
           </ul>
         </li>
       </ul>
+
       <ul class="nav navbar-nav navbar-right">
-        <li><a href="#">Link</a></li>
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{ ctx.User.Name }} <span class="caret"></span></a>
           <ul class="dropdown-menu" role="menu">
@@ -58,11 +58,32 @@
           </ul>
         </li>
       </ul>
+      {% endif %}
+
     </div><!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->
 </nav>
 
     <div class="container">
+{% if errors %}
+
+<div class="alert alert-danger" role="alert">
+<ul class="list-group">
+{% for error in errors %}
+    <li class="list-group-item">{{ error.Message }}</li>
+{% endfor %}
+</ul>
+</div>
+{% endif %}
+{% if error %}
+<div class="alert alert-danger" role="alert">
+<ul class="list-group">
+
+    <li class="list-group-item">{{ error }}</li>
+</ul>
+</div>
+{% endif %}
+
     {% block content %}
     {% endblock %}
     </div>

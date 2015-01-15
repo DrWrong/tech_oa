@@ -4,9 +4,17 @@
     login
 {% endblock %}
 {% block content %}
+{% if errors %}
+
+<div class="alert alert-danger" role="alert">
+<ul class="list-group">
 {% for error in errors %}
-    {{ error.Message }}
+    <li class="list-group-item">{{ error.Message }}</li>
 {% endfor %}
+</ul>
+</div>
+{% endif %}
+
 <form role="form" action="login" method="post">
   <div class="form-group">
     <label for="exampleInputEmail1">学生证号或工号</label>

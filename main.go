@@ -55,6 +55,11 @@ func runWeb() {
 		ctx.Data["ctx"] = ctx
 		ctx.HTML(200, "dashbord")
 	})
+	m.Group("/project/:id", func() {
+		m.Get("", project.Detail)
+		m.Post("/score", binding.Bind(form.ScoreForm{}), project.JudgeScore)
+		m.Get("/score", project.Score)
+	}, loginReq, middleware.ProjectMiddleware())
 
 	m.Group("/user", func() {
 		m.Get("/login", user.Login)
