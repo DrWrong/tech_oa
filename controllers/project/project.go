@@ -31,9 +31,9 @@ func Detail(ctx *middleware.Context) {
 }
 
 func Score(ctx *middleware.Context) {
-	ctx.Data["project"] = ctx.Project
-	ctx.Data["groups"] = ctx.Project.GetGroups()
-	ctx.HTML(200, "project/detail")
+	group, _ := ctx.User.GroupSpecifcProject(ctx.Project)
+	ctx.Data["groupscores"] = group.GetJudegGroupScores()
+	ctx.HTML(200, "project/score")
 	return
 }
 

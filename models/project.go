@@ -58,6 +58,13 @@ func (g *Group) GetDescription() string {
 	return g.GroupLeader.Name + g.ProjectSubjectChosen.Subject.Name
 }
 
+func (fromGroup *Group) GetJudegGroupScores() []*GroupScore {
+	var groupscores []*GroupScore
+	o := orm.NewOrm()
+	o.QueryTable("group_score").Filter("FromGroup", fromGroup.Id).RelatedSel("JudgeGroup").All(&groupscores)
+	return groupscores
+}
+
 type FileUploadGroup struct {
 	Id       int
 	Project  *Project `orm:"rel(fk)"`
@@ -70,6 +77,15 @@ type GroupScore struct {
 	FromGroup  *Group `orm:"rel(fk)"`
 	JudgeGroup *Group `orm:"rel(fk)"`
 	Score      int
+}
+
+func (g *GroupScore) GetJudgeGroup() *Group {
+	if g.JudgeGroup != nil {
+		return g.JudgeGroup
+	}
+	o := orm.NewOrm()
+	o.Read(g.JudgeGroup)
+	return g.JudgeGroup
 }
 
 type QuestionAnswer struct {

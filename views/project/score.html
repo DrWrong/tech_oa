@@ -1,0 +1,44 @@
+{% extends "../base.html" %}
+{% block content %}
+{% if success %}
+<div class="alert alert-success" role="alert">
+<ul class="list-group">
+
+    <li class="list-group-item">{{ success }}</li>
+</ul>
+</div>
+
+{% endif %}
+<div class="row">
+  <div class="col-xs-8">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>组名</th>
+        <th>分数</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for groupScore in groupscores %}
+        <tr>
+          <td>{{ groupScore.GetJudgeGroup().GetDescription() }}</td>
+          <td>{{ groupScore.Score }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  </div>
+  <div class="col-xs-4">
+  <ul class="nav nav-pills nav-stacked" role="tablist">
+  <li >
+      <a href="/project/{{ ctx.Project.Id }}">学生评分</a>
+  </li>
+  <li class="active"><a href="/project/{{ ctx.Project.Id }}">我评价的小组</a></li>
+  </ul>
+  </div>
+</div>
+
+
+
+{% endblock %}
