@@ -13,6 +13,7 @@ import (
 	"os"
 	// "tech_oa/middleware/binding"
 	"tech_oa/controllers/project"
+	"tech_oa/controllers/score"
 	"tech_oa/controllers/user"
 	"tech_oa/form"
 	"tech_oa/middleware"
@@ -52,13 +53,15 @@ func runWeb() {
 	// bindIgnErr := binding.BindIgnErr
 	loginReq := middleware.Toggle(&middleware.ToggleOptions{SignInRequire: true})
 	m.Get("/", loginReq, func(ctx *middleware.Context) {
-		ctx.Data["ctx"] = ctx
+		// ctx.Data["ctx"] = ctx
 		ctx.HTML(200, "dashbord")
 	})
 	m.Group("/project/:id", func() {
 		m.Get("", project.Detail)
-		m.Post("/score", binding.Bind(form.ScoreForm{}), project.JudgeScore)
-		m.Get("/score", project.Score)
+		m.Group("/score", func() {
+			m.Get("", score.Home)
+			m.Post("", binding.BindIgnErr(form.ScoreForm{}), score.JudgeScore)
+		}, middleware.ScoreMiddleWare())
 	}, loginReq, middleware.ProjectMiddleware())
 
 	m.Group("/user", func() {
@@ -69,8 +72,14 @@ func runWeb() {
 	})
 	adminReq := middleware.Toggle(&middleware.ToggleOptions{SignInRequire: true, AdminRequire: true})
 	m.Group("/admin", func() {
+		m.Get("", func(ctx *middleware.Context) {
+			// ctx.Data["ctx"] = ctx
+			ctx.HTML(200, "admin/home")
+		})
 		m.Group("/project", func() {
+			m.Get("", project.List)
 			m.Get("/create", project.Create)
+			// m.Post("/")
 		})
 	}, adminReq)
 

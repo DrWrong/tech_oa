@@ -9,7 +9,7 @@
 
     <!-- Bootstrap -->
     <link href="/bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
-
+    <link rel="stylesheet" href="https://raw.githubusercontent.com/t0m/select2-bootstrap-css/bootstrap3/select2-bootstrap.css">
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -37,12 +37,14 @@
 
       <ul class="nav navbar-nav">
         <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown">我涉及到的项目<span class="caret"></span></a>
-          <ul class="dropdown-menu" role="menu">
-            {% for project in ctx.User.GetProjects() %}
-                <li><a href="/project/{{ project.Id }}">{{ project.Name }}</a></li>
-             {% endfor %}
-          </ul>
+          {% if ctx.User.GetProjects() %}
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">我涉及到的项目<span class="caret"></span></a>
+            <ul class="dropdown-menu" role="menu">
+              {% for project in ctx.User.GetProjects() %}
+                  <li><a href="/project/{{ project.Id }}">{{ project.Name }}</a></li>
+               {% endfor %}
+            </ul>
+          {% endif %}
         </li>
       </ul>
 
@@ -51,10 +53,9 @@
           <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{ ctx.User.Name }} <span class="caret"></span></a>
           <ul class="dropdown-menu" role="menu">
             <li><a href="/user/logout">登出</a></li>
-            <li><a href="#">Another action</a></li>
-            <li><a href="#">Something else here</a></li>
-            <li class="divider"></li>
-            <li><a href="#">Separated link</a></li>
+            {% if ctx.User.IsAdmin %}
+              <li><a href="/admin">管理后台</a></li>
+            {% endif %}
           </ul>
         </li>
       </ul>
@@ -64,7 +65,7 @@
   </div><!-- /.container-fluid -->
 </nav>
 
-    <div class="container">
+    <div class="container-fluid">
 {% if errors %}
 
 <div class="alert alert-danger" role="alert">
@@ -91,5 +92,10 @@
     <script src="/bower_components/jquery/dist/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="/bower_components/select2/select2.min.js"></script>
+    <script src="/js/main.js"></script>
+    {% block script %}
+
+    {% endblock %}
   </body>
 </html>

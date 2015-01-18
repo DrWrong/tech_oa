@@ -20,17 +20,6 @@ type User struct {
 	IsActive    bool       `orm: "default(1)`
 }
 
-type UserProject struct {
-	Id      int
-	Project *Project `orm:"rel(fk)"`
-	User    *User    `orm:"rel(fk)"`
-	// Goup   *Group   `orm:"null;rel(one)"`
-}
-
-func (u *UserProject) TableName() string {
-	return "rel_user_project"
-}
-
 func (u *User) CheckPassword(password string) bool {
 	if !u.IsActive {
 		return false
@@ -64,7 +53,6 @@ func (u *User) GetProjects() []*Project {
 
 }
 
-// 现在只允许小组长来操作
 func (u *User) GroupSpecifcProject(project *Project) (*Group, error) {
 	o := orm.NewOrm()
 	// group := Group{Project: project, GroupLeader: u}
@@ -72,7 +60,88 @@ func (u *User) GroupSpecifcProject(project *Project) (*Group, error) {
 	var group Group
 	err := o.QueryTable("group").Filter("Project", project.Id).Filter("GroupLeader", u.Id).One(&group)
 	fmt.Println(err)
+	// if err == nil {}
 	return &group, err
+}
+
+func (u *User) CanAcessProject(project *Project) bool {
+	// err := o.QueryTable("rel_user_project").Filter()
+	if u.IsAdmin {
+		return true
+	}
+	for _, uproject := range u.GetProjects() {
+		if uproject == project {
+			return true
+		}
+	}
+	return false
+}
+
+type RScore struct {
+	Desc  string
+	Score int
+}
+
+type ScoreResponse struct {
+	Group  *Group
+	Scores []RScore
+}
+
+func (u *User) GetJudegGroupScores(project *Project) []ScoreResponse {
+	var groupscores []*GroupScore
+	groups := project.GetGroups()
+	groupIds := make([]int, len(groups))
+	for i, group := range groups {
+		groupIds[i] = group.Id
+	}
+	o := orm.NewOrm()
+	o.QueryTable("group_score").Filter(
+		"FromUser", u.Id).Filter(
+		"JudgeGroup__Id__in", groupIds).RelatedSel(
+		"JudgeGroup").RelatedSel("Task").OrderBy(
+		"JudgeGroup__Id", "type").All(&groupscores)
+
+	scoreResponses := []ScoreResponse{}
+	scoreResponse := ScoreResponse{
+		Group:  groupscores[0].JudgeGroup,
+		Scores: []RScore{},
+	}
+	group := groupscores[0].JudgeGroup
+
+	for _, groupscore := range groupscores {
+		if groupscore.JudgeGroup.Id != group.Id {
+			// fmt.Println("new scoreResponse")
+			scoreResponses = append(scoreResponses, scoreResponse)
+			scoreResponse = ScoreResponse{
+				Group:  groupscore.JudgeGroup,
+				Scores: []RScore{},
+			}
+			group = groupscore.JudgeGroup
+		}
+
+		scoreResponse.Scores = append(scoreResponse.Scores, RScore{
+			Score: groupscore.Score,
+			Desc:  groupscore.GetTypeDesc(),
+		})
+		// fmt.Printf("desc: %s\n", groupscore.GetTypeDesc())
+		// fmt.Println(len(scoreResponse.Scores))
+
+		// fmt.Println(scoreResponse.Scores)
+	}
+	scoreResponses = append(scoreResponses, scoreResponse)
+	fmt.Println(scoreResponses)
+	return scoreResponses
+}
+
+type UserProject struct {
+	Id      int
+	Project *Project `orm:"rel(fk)"`
+	User    *User    `orm:"rel(fk)"`
+	// Goup   *Group   `orm:"null;rel(one)"`
+}
+
+func (u *UserProject) TableName() string {
+	return "rel_user_project"
 }
 
 // func (u *User) IsAdmin() bool {

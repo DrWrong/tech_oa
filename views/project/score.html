@@ -1,44 +1,76 @@
-{% extends "../base.html" %}
-{% block content %}
-{% if success %}
-<div class="alert alert-success" role="alert">
-<ul class="list-group">
-
-    <li class="list-group-item">{{ success }}</li>
-</ul>
-</div>
-
-{% endif %}
+{% extends "base.html" %}
+{% block maincontent %}
 <div class="row">
-  <div class="col-xs-8">
+  <div class="col-md-6">
+<form action="/project/{{ ctx.Project.Id }}/score" method="post">
+  <div class="form-group">
+    <label for="group_choice">选择小组</label>
+    <select class="form-control" name="group_id" id="group_choice">
+      {% for group in ctx.Project.GetGroups() %}
+        <option value={{ group.Id }}>{{ group.GetDescription() }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  {% for config in ctx.Task.GetScoreConfig() %}
+    <div class="form-group">
+    <label for="score_{{ config.Type }}">{{ config.Desc }} 评分 占比 {{ config.ScoreWeight }} %</label>
+    <input class="form-control" id="score_{{ config.Type }}" type="number" name="score">
+    </div>
+  {% endfor %}
+  <div class="form-group">
+    <button class="btn btn-default" type="submit">提交</button>
+  </div>
+</form>
+  </div>
+  <div class="col-md-6">
   <table class="table">
     <thead>
       <tr>
-        <th>组名</th>
+        <th>小组名</th>
+        <th>阶段描述</th>
         <th>分数</th>
       </tr>
     </thead>
     <tbody>
-      {% for groupScore in groupscores %}
+      {% for scoreResponse in ctx.User.GetJudegGroupScores(ctx.Project) %}
         <tr>
-          <td>{{ groupScore.GetJudgeGroup().GetDescription() }}</td>
-          <td>{{ groupScore.Score }}</td>
+          <td>{{ scoreResponse.Group.GetDescription() }}</td>
+          <td>
+            <table class="table">
+            {% for score in scoreResponse.Scores %}
+              <tr>
+                <td>{{ score.Desc }}</td>
+              </tr>
+            {% endfor %}
+            </table>
+          </td>
+          <td>
+            <table class="table">
+            {% for score in scoreResponse.Scores %}
+              <tr>
+                <td>{{ score.Score }}</td>
+              </tr>
+            {% endfor %}
+            </table>
+          </td>
+
         </tr>
+
       {% endfor %}
     </tbody>
   </table>
-
-  </div>
-  <div class="col-xs-4">
-  <ul class="nav nav-pills nav-stacked" role="tablist">
-  <li >
-      <a href="/project/{{ ctx.Project.Id }}">学生评分</a>
-  </li>
-  <li class="active"><a href="/project/{{ ctx.Project.Id }}">我评价的小组</a></li>
-  </ul>
   </div>
 </div>
 
 
+
+{% endblock %}
+
+{% block script %}
+<script>
+(function($){
+  $("#nav_project_{{ctx.Project.Id}}_score").addClass("active")
+})(jQuery);
+</script>
 
 {% endblock %}
