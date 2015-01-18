@@ -70,7 +70,7 @@ func (u *User) CanAcessProject(project *Project) bool {
 		return true
 	}
 	for _, uproject := range u.GetProjects() {
-		if uproject == project {
+		if uproject.Id == project.Id {
 			return true
 		}
 	}
@@ -95,13 +95,15 @@ func (u *User) GetJudegGroupScores(project *Project) []ScoreResponse {
 		groupIds[i] = group.Id
 	}
 	o := orm.NewOrm()
-	o.QueryTable("group_score").Filter(
+	num, _ := o.QueryTable("group_score").Filter(
 		"FromUser", u.Id).Filter(
 		"JudgeGroup__Id__in", groupIds).RelatedSel(
 		"JudgeGroup").RelatedSel("Task").OrderBy(
 		"JudgeGroup__Id", "type").All(&groupscores)
-
 	scoreResponses := []ScoreResponse{}
+	if num == 0 {
+		return scoreResponses
+	}
 	scoreResponse := ScoreResponse{
 		Group:  groupscores[0].JudgeGroup,
 		Scores: []RScore{},
